@@ -8,4 +8,5 @@ echo "run db migration"
 # DB url, up runs all migrations
 
 echo "start the app"
+source /app/app.env
 exec "$@"  # take all parameters, pass to the script, and run it, EXPECTED: /app/main in Dockerfile
