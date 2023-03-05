@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aws-auth
+  namespace: kube-system
+data:
+  mapRoles: |
+    - rolearn: arn:aws:iam::611106530103:role/gh-build-role
+      username: gh-build-role
+      groups:
+        - system:masters
+  mapUsers: |
+    # map user IAM user Alice in 000000000000 to user "alice" in group "system:masters"
+    - userarn: arn:aws:iam::611106530103:user/github-ci
+      username: github-ci
+      groups:
+        - system:masters

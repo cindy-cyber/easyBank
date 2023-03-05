@@ -1,5 +1,5 @@
 postgres:
-	docker run --name postgres15 -network mybank-network -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d postgres:15-alpine
+	docker run --name postgres15 --network mybank-network -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d postgres:15-alpine
 
 createdb:
 	docker exec -it postgres15 createdb --username=root --owner=root simple_bank
@@ -22,6 +22,12 @@ migratedown:
 migratedown1:
 	migrate -path db/migration -database "postgresql://root:password@localhost:5432/simple_bank?sslmode=disable" -verbose down 1
 
+db_docs: # build doc for our database schema
+	dbdocs build doc/db.dbml
+
+db_schema: # generate sql code based on the schema defined in db.dbml
+	dbml2sql --postgres -o doc/schema.sql doc/db.dbml
+
 sqlc:
 	sqlc generate
 
@@ -33,4 +39,15 @@ server:
 
 mock:
 	mockgen -package mockdb -destination db/mock/store.go github.com/cindy-cyber/simpleBank/db/sqlc Store
-.PHONY: postgres createdb dropdb migrateup migrateup1 migratedown migratedown1 sqlc test server mock
+
+proto:
+	rm -f pb/*.go
+	protoc --proto_path=proto --go_out=pb --go_opt=paths=source_relative \
+    --go-grpc_out=pb --go-grpc_opt=paths=source_relative \
+	--grpc-gateway_out=pb --grpc-gateway_opt paths=source_relative \
+    proto/*.proto
+
+evans:
+	evans --host localhost --port 9090 -r repl
+
+.PHONY: postgres createdb dropdb migrateup migrateup1 migratedown migratedown1 db_docs db_schema sqlc test server mock proto evans
