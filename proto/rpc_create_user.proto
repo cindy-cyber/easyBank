@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package pb;  // group protos of the some topic tgt
+
+import "user.proto";
+
+option go_package = "github.com/cindy-cyber/simpleBank/pb";
+
+message CreateUserRequest {
+    string username = 1;
+    string password = 2;
+    string full_name = 3;
+    string email = 4;
+}
+
+message CreateUserResponse {
+    User user = 1;
+}
